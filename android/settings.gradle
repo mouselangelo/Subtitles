@@ -1,0 +1,3 @@
+rootProject.name = 'Subtitles'
+
+include ':app'
