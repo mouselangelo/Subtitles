@@ -1,5 +1,5 @@
 import React, { Component } from "React";
-import { View, Text, Button, StyleSheet, Platform } from "react-native";
+import { View, Text, Button, Picker, StyleSheet, Platform } from "react-native";
 import Video, { TextTrackType } from "react-native-video";
 
 const videoURL =
@@ -10,7 +10,9 @@ export default class App extends Component {
     loading: false,
     errorMessage: null,
     audioTracks: [],
-    textTracks: []
+    textTracks: [],
+    showSubtitlePicker: false,
+    selectedSubtitle: null
   };
 
   onVideoLoading = () => {
@@ -18,12 +20,14 @@ export default class App extends Component {
   };
 
   onVideoLoaded = ({ audioTracks, textTracks }) => {
-    console.log("Video loaded: ", audioTracks, textTracks);
     const subtitles = this.getSubtitleTracks(textTracks);
+    // could also select a subtitle based on language
+    selectedSubtitle = subtitles.length > 0 ? subtitles[0].title : null;
     this.setState({
       textTracks: subtitles,
       audioTracks,
-      loading: false
+      loading: false,
+      selectedSubtitle: selectedSubtitle
     });
   };
 
@@ -35,6 +39,8 @@ export default class App extends Component {
   };
 
   getSubtitleTracks = textTracks => {
+    // on Android also displays other subtitle formats
+    // Filtering those is optional
     if (Platform.OS === "android") {
       return textTracks.filter(({ type }) => {
         return type === TextTrackType.VTT;
@@ -51,21 +57,64 @@ export default class App extends Component {
           title="Subtitles"
           style={styles.button}
           onPress={() => {
-            console.log(
-              this.state.textTracks.map(item => {
-                return item.title;
-              })
-            );
+            this.setState({ showSubtitlePicker: true });
           }}
         />
       </View>
     );
   }
 
+  renderSubtitlePicker() {
+    const { textTracks, selectedSubtitle } = this.state;
+    if (!(textTracks && textTracks.length > 0)) {
+      return null;
+    }
+
+    return (
+      <View style={{ backgroundColor: "#e0e0e0", padding: 20 }}>
+        <Text style={styles.dialogTitle}>Subtitles</Text>
+        <Picker
+          mode="dialog"
+          style={{ minWidth: 240, minHeight: 240 }}
+          prompt="Subtitles"
+          title="Subtitles"
+          selectedValue={selectedSubtitle}
+          onValueChange={(itemValue, itemIndex) => {
+            const selectedSubtitle = itemIndex > 0 ? itemValue : null;
+            this.setState({
+              showSubtitlePicker: false,
+              selectedSubtitle
+            });
+          }}
+        >
+          <Picker.Item label="None" key="none" value="none" />
+          {textTracks.map(({ title }) => {
+            return <Picker.Item label={title} key={title} value={title} />;
+          })}
+        </Picker>
+      </View>
+    );
+  }
+
   render() {
-    console.log(this.state);
-    const { loading, errorMessage, textTracks } = this.state;
+    const {
+      loading,
+      errorMessage,
+      textTracks,
+      showSubtitlePicker,
+      selectedSubtitle
+    } = this.state;
+
     const hasSubtitles = !loading && textTracks.length > 0;
+
+    const selectedTextTrack = selectedSubtitle
+      ? {
+          type: "title",
+          value: selectedSubtitle
+        }
+      : {
+          type: "disabled"
+        };
 
     return (
       <View style={styles.container}>
@@ -78,12 +127,14 @@ export default class App extends Component {
           onLoadStart={this.onVideoLoading}
           onError={this.onVideoError}
           onLoad={this.onVideoLoaded}
+          selectedTextTrack={selectedTextTrack}
         />
         {loading && <Text style={styles.loadingText}>Loading...</Text>}
         {errorMessage && (
           <Text style={styles.errorText}>Oops!! {errorMessage}</Text>
         )}
         {hasSubtitles && this.renderToolBar()}
+        {hasSubtitles && showSubtitlePicker && this.renderSubtitlePicker()}
       </View>
     );
   }
@@ -127,5 +178,10 @@ const styles = StyleSheet.create({
   button: {
     fontSize: 10,
     color: "#cccccc"
+  },
+  dialogTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    alignSelf: "center"
   }
 });
