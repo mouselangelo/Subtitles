@@ -3,15 +3,17 @@ import { View, Text, Button, Picker, StyleSheet, Platform } from "react-native";
 import Video, { TextTrackType } from "react-native-video";
 
 const videos = [
+  "https://s3-us-west-1.amazonaws.com/transcoded-video-output-0/hls/rabbit.m3u8", // transcoded using aws elastic transcoder
   "https://devstreaming-cdn.apple.com/videos/wwdc/2016/504m956dgg4hlw2uez9/504/hls_vod_mvp.m3u8", //WWDC 2016: What's new in HLS - multiple subtitles
   "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_16x9/bipbop_16x9_variant.m3u8", // multiple audio tracks & subtitles
   "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_4x3/bipbop_4x3_variant.m3u8", // 4x3 aspect ratio
   "https://devstreaming-cdn.apple.com/videos/streaming/examples/bipbop_adv_example_hevc/master.m3u8", // Advanced stream (HEVC/H.264) fMP4
   "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8", // Advanced stream TS
-  "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8" //Advanced stream fMP4
+  "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8", //Advanced stream fMP4
+  "https://devstreaming-cdn.apple.com/videos/tutorials/20170912/501n21xhva8lv/authoring_4k_and_hdr_hls_streams/hls_vod_mvp.m3u8"
 ];
 
-const videoURL = videos[1];
+const videoURL = videos[0];
 
 export default class App extends Component {
   state = {
